@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Command — Banking Patterns</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Command Pattern — Transactions & Undo</h1>
+    <nav><a href="index.html">Home</a> · <a href="observer.html">Observer</a> · <a href="strategy.html">Strategy</a></nav>
+  </header>
+
+  <main class="container grid-2">
+    <section class="card">
+      <h3>Accounts</h3>
+      <div id="acctList"></div>
+      <hr/>
+      <label>From<select id="from"></select></label>
+      <label>To<select id="to"></select></label>
+      <label>Amount<input id="amt" type="number" value="100"></label>
+      <div class="row">
+        <button id="doDeposit">Deposit</button>
+        <button id="doWithdraw">Withdraw</button>
+        <button id="doTransfer">Transfer</button>
+        <button id="doUndo" class="danger">Undo</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>History (undo stack)</h3>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script type="module" src="js/command.js"></script>
+</body>
+</html>

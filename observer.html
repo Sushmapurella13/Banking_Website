@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Observer — Banking Patterns</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Observer Pattern — Notifications</h1>
+    <nav><a href="index.html">Home</a> · <a href="strategy.html">Strategy</a> · <a href="command.html">Command</a></nav>
+  </header>
+
+  <main class="container grid-2">
+    <section class="card">
+      <h3>Create account</h3>
+      <label>Owner <input id="owner" placeholder="e.g. Sushma" /></label>
+      <label>Type
+        <select id="atype"><option value="savings">Savings</option><option value="current">Current</option><option value="fixed">Fixed</option></select>
+      </label>
+      <label>Initial <input id="initial" type="number" value="1000" /></label>
+      <button id="create">Create</button>
+
+      <hr/>
+      <h3>Accounts</h3>
+      <div id="accountsList"></div>
+    </section>
+
+    <section class="card">
+      <h3>Notifications</h3>
+      <div id="notifications" class="notifications"></div>
+
+      <hr/>
+      <h3>Actions</h3>
+      <label>Account
+        <select id="acctSelect"></select>
+      </label>
+      <label>Amount <input id="amount" type="number" value="100" /></label>
+      <div class="row">
+        <button id="deposit">Deposit</button>
+        <button id="withdraw">Withdraw</button>
+        <button id="interest">Apply Interest</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script type="module" src="js/observer.js"></script>
+</body>
+</html>

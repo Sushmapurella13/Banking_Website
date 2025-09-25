@@ -2,303 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Banking App — Observer / Strategy / Command Patterns</title>
-  <style>
-    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 24px; background:#f5f7fb; color:#111827 }
-    .container{max-width:1100px;margin:0 auto}
-    h1{font-size:20px}
-    .grid{display:grid;gap:16px;grid-template-columns: 360px 1fr}
-    .card{background:white;padding:14px;border-radius:8px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
-    label{display:block;margin-top:8px;font-size:13px}
-    input, select{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #e5e7eb}
-    button{margin-top:10px;padding:8px 12px;border-radius:8px;border:0;background:#2563eb;color:white;cursor:pointer}
-    .small{font-size:13px}
-    .row{display:flex;gap:8px}
-    .account-item{display:flex;justify-content:space-between;padding:8px 10px;border-radius:6px;border:1px dashed #e6eefc;margin-bottom:6px}
-    .transactions{max-height:240px;overflow:auto}
-    .notify{background:#f1f5f9;padding:8px;border-radius:6px;margin-bottom:8px}
-    .muted{color:#6b7280;font-size:13px}
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Banking Patterns — Home</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Banking App — Observer / Strategy / Command Patterns</h1>
-    <p class="muted">Save this file as <code>banking_bpatterns.html</code> and open it in your browser (or use Live Server in VSCode).</p>
+  <header class="top">
+    <h1>Banking Patterns (Observer · Strategy · Command)</h1>
+    <nav>
+      <a href="observer.html">Observer</a>
+      <a href="strategy.html">Strategy</a>
+      <a href="command.html">Command</a>
+    </nav>
+  </header>
 
-    <div class="grid">
-      <div>
-        <div class="card">
-          <h3>Create account</h3>
-          <label>Owner name<input id="owner" placeholder="e.g. Sushma"/></label>
-          <label>Type
-            <select id="acctType">
-              <option value="savings">Savings</option>
-              <option value="fixed">Fixed Deposit</option>
-              <option value="current">Current</option>
-            </select>
-          </label>
-          <label>Initial balance<input id="initial" type="number" value="1000" /></label>
-          <button id="createAcct">Create Account</button>
+  <main class="container">
+    <section class="card">
+      <h2>Overview</h2>
+      <p>
+        This demos three behavioral patterns applied to a simple banking app:
+        <strong>Observer</strong> (notifications), <strong>Strategy</strong> (interest),
+        and <strong>Command</strong> (deposit/withdraw/transfer with undo).
+      </p>
+    </section>
 
-          <hr/>
-          <h3>Accounts</h3>
-          <div id="accountsList"></div>
-        </div>
+    <section class="card">
+      <h2>Quick links</h2>
+      <ul>
+        <li><a href="observer.html">Open Observer demo</a></li>
+        <li><a href="strategy.html">Open Strategy demo</a></li>
+        <li><a href="command.html">Open Command demo</a></li>
+      </ul>
+    </section>
 
-        <div class="card" style="margin-top:12px">
-          <h3>Notifications</h3>
-          <div id="notifications"></div>
-        </div>
-      </div>
+    <section class="card">
+      <h2>Publish</h2>
+      <p class="muted">If you publish this repo to GitHub Pages, make sure <strong>index.html</strong> is in repo root (or use /docs).</p>
+    </section>
+  </main>
 
-      <div>
-        <div class="card">
-          <h3>Operations</h3>
-          <div class="row">
-            <div style="flex:1">
-              <label>From account
-                <select id="fromAcct"></select>
-              </label>
-            </div>
-            <div style="flex:1">
-              <label>To account (for transfer)
-                <select id="toAcct"></select>
-              </label>
-            </div>
-          </div>
-
-          <label>Amount<input id="amount" type="number" value="100"/></label>
-          <div class="row">
-            <button id="depositBtn">Deposit</button>
-            <button id="withdrawBtn">Withdraw</button>
-            <button id="transferBtn">Transfer</button>
-            <button id="applyInterest">Apply Interest</button>
-            <button id="undoBtn" style="background:#ef4444">Undo</button>
-          </div>
-
-          <hr/>
-          <h3>Transaction history</h3>
-          <div id="txHistory" class="transactions"></div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <h3>Design notes</h3>
-          <ul>
-            <li class="small">Observer Pattern: <strong>NotificationService</strong> subscribes to <strong>Account</strong>.</li>
-            <li class="small">Strategy Pattern: interest behavior is provided by account.strategy.</li>
-            <li class="small">Command Pattern: deposit/withdraw/transfer are commands with undo support.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<script>
-/* ======= Observer Pattern ======= */
-class Subject {
-  constructor(){ this._observers = [] }
-  subscribe(o){ this._observers.push(o) }
-  unsubscribe(o){ this._observers = this._observers.filter(x=>x!==o) }
-  notify(event){ this._observers.forEach(o=>o.update(event)) }
-}
-
-class Account extends Subject{
-  constructor(id, owner, type, balance=0){
-    super();
-    this.id = id;
-    this.owner = owner;
-    this.type = type; // 'savings' | 'fixed' | 'current'
-    this.balance = balance;
-    this.strategy = InterestStrategies.get(type);
-  }
-
-  deposit(amount){
-    if(amount<=0) throw new Error('Amount > 0');
-    this.balance += amount;
-    this.notify({type:'deposit',account:this,amount});
-  }
-
-  withdraw(amount){
-    if(amount<=0) throw new Error('Amount > 0');
-    if(amount > this.balance) throw new Error('Insufficient funds');
-    this.balance -= amount;
-    this.notify({type:'withdraw',account:this,amount});
-  }
-
-  applyInterest(){
-    const interest = this.strategy.calculate(this.balance);
-    this.balance += interest;
-    this.notify({type:'interest',account:this,amount:interest});
-  }
-}
-
-class NotificationService{
-  constructor(container){ this.container = container }
-  update(event){
-    const el = document.createElement('div');
-    el.className = 'notify';
-    el.textContent = `[${new Date().toLocaleTimeString()}] ${event.type.toUpperCase()} on ${event.account.owner} (ID:${event.account.id}) : ${event.amount.toFixed(2)} — New balance: ${event.account.balance.toFixed(2)}`;
-    this.container.prepend(el);
-  }
-}
-
-/* ======= Strategy Pattern ======= */
-class SavingsStrategy{ static calculate(balance){ return balance * 0.03; } } // 3%
-class FixedStrategy{ static calculate(balance){ return balance * 0.06; } }   // 6%
-class CurrentStrategy{ static calculate(balance){ return 0; } }            // no interest
-
-const InterestStrategies = {
-  get(type){
-    switch(type){
-      case 'savings': return SavingsStrategy;
-      case 'fixed': return FixedStrategy;
-      case 'current': return CurrentStrategy;
-      default: return CurrentStrategy;
-    }
-  }
-}
-
-/* ======= Command Pattern ======= */
-class CommandManager{
-  constructor(){ this.stack = [] }
-  execute(cmd){ cmd.execute(); if(cmd.canUndo) this.stack.push(cmd); renderHistory(); }
-  undo(){ const cmd = this.stack.pop(); if(cmd){ cmd.undo(); renderHistory(); } }
-}
-
-class BaseCommand{
-  constructor(){ this.canUndo = true }
-  execute(){ throw 'Not implemented' }
-  undo(){ throw 'Not implemented' }
-}
-
-class DepositCommand extends BaseCommand{
-  constructor(account, amount){ super(); this.account = account; this.amount = amount }
-  execute(){ this.account.deposit(this.amount); }
-  undo(){ this.account.withdraw(this.amount); }
-}
-
-class WithdrawCommand extends BaseCommand{
-  constructor(account, amount){ super(); this.account = account; this.amount = amount }
-  execute(){ this.account.withdraw(this.amount); }
-  undo(){ this.account.deposit(this.amount); }
-}
-
-class TransferCommand extends BaseCommand{
-  constructor(from, to, amount){ super(); this.from = from; this.to = to; this.amount = amount }
-  execute(){ this.from.withdraw(this.amount); this.to.deposit(this.amount); }
-  undo(){ this.to.withdraw(this.amount); this.from.deposit(this.amount); }
-}
-
-/* ======= Simple in-memory bank & UI glue ======= */
-const accounts = new Map();
-let idCounter = 1;
-const notificationContainer = document.getElementById('notifications');
-const notifier = new NotificationService(notificationContainer);
-const cmdManager = new CommandManager();
-
-function createAccount(owner, type, balance){
-  const acc = new Account(idCounter++, owner, type, balance);
-  acc.subscribe(notifier);
-  accounts.set(acc.id, acc);
-  renderAccounts();
-  return acc;
-}
-
-/* UI helpers */
-function renderAccounts(){
-  const list = document.getElementById('accountsList');
-  const from = document.getElementById('fromAcct');
-  const to = document.getElementById('toAcct');
-  list.innerHTML = '';
-  from.innerHTML = '';
-  to.innerHTML = '';
-  for(const acc of accounts.values()){
-    const el = document.createElement('div'); el.className='account-item';
-    el.innerHTML = `<div><strong>${acc.owner}</strong> <div class="muted">${acc.type} — ID:${acc.id}</div></div><div><div>${acc.balance.toFixed(2)}</div></div>`;
-    list.appendChild(el);
-
-    const opt = document.createElement('option'); opt.value = acc.id; opt.textContent = `${acc.owner} (ID:${acc.id})`;
-    from.appendChild(opt.cloneNode(true));
-    to.appendChild(opt);
-  }
-}
-
-function renderHistory(){
-  const tx = document.getElementById('txHistory');
-  tx.innerHTML = '';
-  cmdManager.stack.slice().reverse().forEach((c, idx)=>{
-    const row = document.createElement('div'); row.style.padding='6px'; row.style.borderBottom='1px solid #f3f4f6';
-    row.innerHTML = `<div><strong>${c.constructor.name}</strong> — ${c.amount?.toFixed?.(2) ?? ''} </div><div class="muted">${c.from?.owner ? `from ${c.from.owner} to ${c.to.owner}` : c.account?.owner ?? ''}</div>`;
-    tx.appendChild(row);
-  });
-}
-
-/* Event wiring */
-document.getElementById('createAcct').addEventListener('click', ()=>{
-  const owner = document.getElementById('owner').value.trim() || 'Unnamed';
-  const type = document.getElementById('acctType').value;
-  const balance = parseFloat(document.getElementById('initial').value) || 0;
-  createAccount(owner, type, balance);
-});
-
-document.getElementById('depositBtn').addEventListener('click', ()=>{
-  const id = Number(document.getElementById('fromAcct').value);
-  const acc = accounts.get(id);
-  const amount = Number(document.getElementById('amount').value);
-  if(!acc) return alert('Select an account');
-  try{
-    const cmd = new DepositCommand(acc, amount);
-    cmdManager.execute(cmd);
-  }catch(e){alert(e.message||e)}
-  renderAccounts();
-});
-
-document.getElementById('withdrawBtn').addEventListener('click', ()=>{
-  const id = Number(document.getElementById('fromAcct').value);
-  const acc = accounts.get(id);
-  const amount = Number(document.getElementById('amount').value);
-  if(!acc) return alert('Select an account');
-  try{
-    const cmd = new WithdrawCommand(acc, amount);
-    cmdManager.execute(cmd);
-  }catch(e){alert(e.message||e)}
-  renderAccounts();
-});
-
-document.getElementById('transferBtn').addEventListener('click', ()=>{
-  const fromId = Number(document.getElementById('fromAcct').value);
-  const toId = Number(document.getElementById('toAcct').value);
-  if(fromId===toId) return alert('Choose different accounts for transfer');
-  const from = accounts.get(fromId);
-  const to = accounts.get(toId);
-  const amount = Number(document.getElementById('amount').value);
-  if(!from||!to) return alert('Select accounts');
-  try{
-    const cmd = new TransferCommand(from, to, amount);
-    cmdManager.execute(cmd);
-  }catch(e){alert(e.message||e)}
-  renderAccounts();
-});
-
-document.getElementById('applyInterest').addEventListener('click', ()=>{
-  const id = Number(document.getElementById('fromAcct').value);
-  const acc = accounts.get(id);
-  if(!acc) return alert('Select an account');
-  try{ acc.applyInterest(); }
-  catch(e){ alert(e.message||e) }
-  renderAccounts();
-});
-
-document.getElementById('undoBtn').addEventListener('click', ()=>{
-  cmdManager.undo(); renderAccounts();
-});
-
-/* bootstrap some sample accounts */
-createAccount('Sushma', 'savings', 2000);
-createAccount('Arjun', 'current', 500);
-createAccount('Navya', 'fixed', 10000);
-
-</script>
+  <footer class="footer">Made for demo — Sushma</footer>
 </body>
 </html>

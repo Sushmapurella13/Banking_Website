@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Strategy — Banking Patterns</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Strategy Pattern — Interest Calculation</h1>
+    <nav><a href="index.html">Home</a> · <a href="observer.html">Observer</a> · <a href="command.html">Command</a></nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h3>Define & Test Strategies</h3>
+      <p class="muted">Change interest strategy for an example balance and see result.</p>
+
+      <label>Account type
+        <select id="stype">
+          <option value="savings">Savings (3%)</option>
+          <option value="fixed">Fixed (6%)</option>
+          <option value="current">Current (0%)</option>
+        </select>
+      </label>
+
+      <label>Balance <input id="sbalance" type="number" value="1000" /></label>
+      <button id="calc">Calculate Interest</button>
+
+      <div id="result" class="muted" style="margin-top:12px"></div>
+
+      <hr/>
+      <h4>Strategy code</h4>
+      <pre><code>/* Savings: 3%   Fixed: 6%   Current: 0% */</code></pre>
+    </section>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script type="module" src="js/strategy.js"></script>
+</body>
+</html>
